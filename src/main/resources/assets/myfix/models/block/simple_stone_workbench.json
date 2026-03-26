@@ -1,0 +1,22 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"all": "myfix:block/simple_stone_workbench"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 8, 16],
+			"faces": {
+				"north": {"uv": [4.25, 0, 8.25, 2], "texture": "#0"},
+				"east": {"uv": [4.25, 2.25, 8.25, 4.25], "texture": "#0"},
+				"south": {"uv": [4.25, 4.5, 8.25, 6.5], "texture": "#0"},
+				"west": {"uv": [4.25, 6.75, 8.25, 8.75], "texture": "#0"},
+				"up": {"uv": [4, 4, 0, 0], "texture": "#0"},
+				"down": {"uv": [4, 4.25, 0, 8.25], "texture": "#0"}
+			}
+		}
+	]
+}

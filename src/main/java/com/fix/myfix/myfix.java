@@ -1,5 +1,6 @@
 package com.fix.myfix;
 
+import com.fix.myfix.inti.ModBlockEntities;
 import com.fix.myfix.inti.ModBlocks;
 import com.fix.myfix.inti.ModCreativeModeTabs;
 import com.fix.myfix.inti.ModItems;
@@ -44,6 +45,7 @@ public class myfix
         //region ModEventBus
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
         ModCreativeModeTabs.register(modEventBus);
 
         //end region

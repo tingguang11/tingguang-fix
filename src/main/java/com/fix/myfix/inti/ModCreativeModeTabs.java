@@ -14,23 +14,23 @@ public class ModCreativeModeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, myfix.MODID);
 
-    // 注册本模组的创造模式标签。
-    // "tutorial" 为该标签的注册名，会作为内部 ID 使用。
     public static final RegistryObject<CreativeModeTab> TUTORIAL =
-                CREATIVE_MODE_TABS.register("myfix",
+            CREATIVE_MODE_TABS.register("myfix",
                     () -> CreativeModeTab.builder()
 
-                            .icon(() -> new ItemStack(Items.STONE))
+                            .icon(() -> new ItemStack(Items.CRAFTING_TABLE))
 
                             .title(Component.translatable("tab.myfix"))
 
                             .displayItems((itemDisplayParameters, output) -> {
 
+                                output.accept(new ItemStack(ModBlocks.SIMPLE_WORKBENCH.get()));
+                                output.accept(new ItemStack(ModItems.HAMMER.get()));
                             })
 
                             .build());
 
-    public static void register(IEventBus eventBus){
+    public static void register(IEventBus eventBus) {
         CREATIVE_MODE_TABS.register(eventBus);
     }
 }
