@@ -51,6 +51,7 @@ public class SimpleWorkbenchBlockEntity extends BlockEntity {
         }
         setChanged();
     }
+
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
@@ -64,6 +65,7 @@ public class SimpleWorkbenchBlockEntity extends BlockEntity {
 
         ContainerHelper.loadAllItems(tag, this.items);
     }
+
     @Override
     public CompoundTag getUpdateTag() {
         return saveWithoutMetadata();
@@ -73,6 +75,7 @@ public class SimpleWorkbenchBlockEntity extends BlockEntity {
     public void handleUpdateTag(CompoundTag tag) {
         load(tag);
     }
+
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);

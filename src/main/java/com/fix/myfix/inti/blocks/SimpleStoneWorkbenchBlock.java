@@ -7,6 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -36,7 +37,6 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
 
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 8, 16);
 
-    // ✅ 修复：抽象类必须实现方法
     private static final AbstractContainerMenu DUMMY_MENU = new AbstractContainerMenu(null, -1) {
 
         @Override
@@ -72,6 +72,10 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
         ItemStack held = player.getItemInHand(hand);
         int slot = getSlot(hit);
 
+        if (held.is(ModItems.HAMMER.get())) {
+            craft(workbench, player);
+            return InteractionResult.SUCCESS;
+        }
         // 空手取
         if (held.isEmpty()) {
             ItemStack out = workbench.removeItem(slot);
@@ -79,20 +83,6 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
                 player.addItem(out);
                 return InteractionResult.SUCCESS;
             }
-        }
-
-        // 放入（不能是锤子）
-        if (!held.isEmpty() && !held.is(ModItems.HAMMER.get())) {
-            if (workbench.addItem(slot, held)) {
-                held.shrink(1);
-                return InteractionResult.SUCCESS;
-            }
-        }
-
-        // 用锤子触发合成
-        if (held.is(ModItems.HAMMER.get())) {
-            craft(workbench, player);
-            return InteractionResult.SUCCESS;
         }
 
         return InteractionResult.PASS;
@@ -157,7 +147,15 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
             ItemStack result = recipe.get().assemble(inv, level.registryAccess());
 
 // 放结果
-            player.addItem(result);
+            ItemEntity entity = new ItemEntity(
+                    level,
+                    be.getBlockPos().getX() + 0.5,
+                    be.getBlockPos().getY() + 1.0,
+                    be.getBlockPos().getZ() + 0.5,
+                    result
+            );
+
+            level.addFreshEntity(entity);
 
 // 获取“剩余物”（关键：桶不会消失）
             NonNullList<ItemStack> remaining = recipe.get().getRemainingItems(inv);

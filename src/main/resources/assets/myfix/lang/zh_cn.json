@@ -1,5 +1,6 @@
 {
   "tab.myfix": "听光的修复",
   "block.myfix.simple_stone_workbench": "石工作台",
-  "item.myfix.simple_stone_workbench": "石工作台"
+  "item.myfix.simple_stone_workbench": "石工作台",
+    "item.myfix.hammer": "锤子"
 }
