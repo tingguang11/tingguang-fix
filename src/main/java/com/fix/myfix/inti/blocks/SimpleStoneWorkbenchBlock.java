@@ -3,6 +3,7 @@ package com.fix.myfix.inti.blocks;
 import com.fix.myfix.inti.ModItems;
 import com.fix.myfix.inti.blocks.entity.SimpleWorkbenchBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -66,28 +68,44 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
 
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
+        // 必须点顶部
+        if (hit.getDirection() != Direction.UP) {
+            return InteractionResult.PASS;
+        }
+
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof SimpleWorkbenchBlockEntity workbench)) return InteractionResult.PASS;
 
         ItemStack held = player.getItemInHand(hand);
+
+        // 计算格子（slot 在这里定义）
         int slot = getSlot(hit);
 
+        // 1️⃣ 锤子触发合成
         if (held.is(ModItems.HAMMER.get())) {
             craft(workbench, player);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.CONSUME;
         }
-        // 空手取
+
+        // 2️⃣ 空手取出
         if (held.isEmpty()) {
             ItemStack out = workbench.removeItem(slot);
             if (!out.isEmpty()) {
                 player.addItem(out);
-                return InteractionResult.SUCCESS;
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        // 3️⃣ 放入物品（你之前缺的逻辑）
+        if (!held.isEmpty()) {
+            if (workbench.addItem(slot, held)) {
+                held.shrink(1);
+                return InteractionResult.CONSUME;
             }
         }
 
         return InteractionResult.PASS;
     }
-
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos,
                          BlockState newState, boolean isMoving) {
@@ -160,21 +178,26 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
 // 获取“剩余物”（关键：桶不会消失）
             NonNullList<ItemStack> remaining = recipe.get().getRemainingItems(inv);
 
-// 应用剩余物
+// 正确应用剩余物（必须走方法）
             for (int i = 0; i < 9; i++) {
-                be.getItems().set(i, remaining.get(i));
+                be.removeItem(i);
             }
 
-// 同步更新
-            be.setChanged();
-            if (be.getLevel() != null && !be.getLevel().isClientSide) {
-                be.getLevel().sendBlockUpdated(
-                        be.getBlockPos(),
-                        be.getBlockState(),
-                        be.getBlockState(),
-                        3
-                );
+            for (int i = 0; i < 9; i++) {
+                ItemStack remain = remaining.get(i);
+                if (!remain.isEmpty()) {
+                    be.addItem(i, remain);
+                }
             }
         }
+        player.containerMenu.broadcastChanges();
+    }
+    @Override
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+    @Override
+    public boolean useShapeForLightOcclusion(BlockState state) {
+        return false;
     }
 }

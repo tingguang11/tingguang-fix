@@ -29,12 +29,13 @@ public class SimpleWorkbenchBlockEntity extends BlockEntity {
             copy.setCount(1);
             items.set(slot, copy);
             setChanged();
+
+            if (level != null && !level.isClientSide) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+
             return true;
         }
-        if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        }
-
         return false;
     }
 
@@ -42,6 +43,11 @@ public class SimpleWorkbenchBlockEntity extends BlockEntity {
         ItemStack stack = items.get(slot);
         items.set(slot, ItemStack.EMPTY);
         setChanged();
+
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+
         return stack;
     }
 
