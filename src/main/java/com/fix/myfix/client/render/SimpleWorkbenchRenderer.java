@@ -18,6 +18,8 @@ public class SimpleWorkbenchRenderer implements BlockEntityRenderer<SimpleWorkbe
                        PoseStack poseStack, MultiBufferSource buffer,
                        int light, int overlay) {
 
+        poseStack.pushPose();
+
         for (int i = 0; i < 9; i++) {
             ItemStack stack = be.getItems().get(i);
             if (stack.isEmpty()) continue;
@@ -27,9 +29,8 @@ public class SimpleWorkbenchRenderer implements BlockEntityRenderer<SimpleWorkbe
             int row = i / 3;
             int col = i % 3;
 
-            // 九宫格位置
-            double x = 0.2 + col * 0.3;
-            double z = 0.2 + row * 0.3;
+            double x = (col + 0.5) / 3.0;
+            double z = (row + 0.5) / 3.0;
 
             poseStack.translate(x, 0.51, z);
             poseStack.scale(0.25f, 0.25f, 0.25f);
@@ -42,10 +43,12 @@ public class SimpleWorkbenchRenderer implements BlockEntityRenderer<SimpleWorkbe
                     poseStack,
                     buffer,
                     be.getLevel(),
-                    0
+                    be.getBlockPos().hashCode()
             );
 
             poseStack.popPose();
         }
+
+        poseStack.popPose();
     }
 }

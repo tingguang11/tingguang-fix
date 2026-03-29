@@ -23,58 +23,68 @@ public class SimpleWorkbenchBlockEntity extends BlockEntity {
         return items;
     }
 
+    public void sync() {
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    // ===== 基础操作 =====
+
     public boolean addItem(int slot, ItemStack stack) {
         if (items.get(slot).isEmpty()) {
             ItemStack copy = stack.copy();
             copy.setCount(1);
             items.set(slot, copy);
-            setChanged();
-
-            if (level != null && !level.isClientSide) {
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-            }
-
+            sync();
             return true;
         }
         return false;
     }
-
-    public ItemStack removeItem(int slot) {
-        ItemStack stack = items.get(slot);
-        items.set(slot, ItemStack.EMPTY);
-        setChanged();
-
-        if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        }
-
-        return stack;
-    }
-
     public void clear() {
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < items.size(); i++) {
             items.set(i, ItemStack.EMPTY);
         }
-        setChanged();
+        sync();
     }
+
+    public ItemStack removeItem(int slot) {
+        ItemStack old = items.get(slot);
+        items.set(slot, ItemStack.EMPTY);
+        sync();
+        return old;
+    }
+
+    public void setAll(NonNullList<ItemStack> newItems) {
+        for (int i = 0; i < 9; i++) {
+            items.set(i, newItems.get(i));
+        }
+        sync();
+    }
+
+    // ===== NBT =====
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-
-        ContainerHelper.saveAllItems(tag, this.items);
+        ContainerHelper.saveAllItems(tag, items);
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-
-        ContainerHelper.loadAllItems(tag, this.items);
+        items.clear();
+        ContainerHelper.loadAllItems(tag, items);
     }
+
+    // ===== 同步 =====
 
     @Override
     public CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag);
+        return tag;
     }
 
     @Override
@@ -89,6 +99,8 @@ public class SimpleWorkbenchBlockEntity extends BlockEntity {
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        load(pkt.getTag());
+        if (pkt.getTag() != null) {
+            load(pkt.getTag());
+        }
     }
 }
