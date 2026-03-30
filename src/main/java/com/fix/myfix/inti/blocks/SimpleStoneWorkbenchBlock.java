@@ -116,7 +116,10 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
 
         // 锤子合成
         if (held.is(ModItems.HAMMER.get())) {
-            craft(workbench, player);
+            if (!level.isClientSide) {
+                held.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+                craft(workbench, player);
+            }
             return InteractionResult.CONSUME;
         }
 

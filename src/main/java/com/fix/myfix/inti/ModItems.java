@@ -18,9 +18,8 @@ public class ModItems {
                     () -> new BlockItem(ModBlocks.SIMPLE_WORKBENCH.get(),
                             new Item.Properties()));
 
-    public static final RegistryObject<Item> HAMMER =
-            ITEMS.register("hammer",
-                    () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> HAMMER = ITEMS.register("hammer",
+            () -> new Item(new Item.Properties().durability(128)));
 
     public static void register(IEventBus bus) {
         ITEMS.register(bus);
