@@ -39,7 +39,7 @@ public class SimpleStoneWorkbenchBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public SimpleStoneWorkbenchBlock() {
-        super(Properties.of().strength(2f).noOcclusion());
+        super(Properties.of().strength(0.4f).noOcclusion());
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
