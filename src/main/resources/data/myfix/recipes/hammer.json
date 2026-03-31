@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BS",
+    "ST"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:cobblestone"
+    },
+    "T": {
+      "item": "minecraft:stick"
+    },
+    "B": {
+      "item": "minecraft:string"
+    }
+
+  },
+  "result": {
+    "item": "myfix:hammer",
+    "count": 1
+  }
+}
