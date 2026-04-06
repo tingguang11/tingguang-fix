@@ -1,0 +1,21 @@
+{
+  "tab.harder_beginnings": "艰难开局",
+  "block.harder_beginnings.wood_workbench": "木工台",
+  "block.harder_beginnings.clay_brick_block": "黏土砖块",
+  "item.harder_beginnings.wood_workbench": "木工台",
+  "item.harder_beginnings.clay_brick": "黏土砖",
+  "item.harder_beginnings.fired_clay_brick": "烤制黏土砖",
+  "item.harder_beginnings.clay_brick_block": "黏土砖块",
+  "item.harder_beginnings.fiber": "纤维",
+  "item.harder_beginnings.hemp_string": "麻线",
+  "item.harder_beginnings.flint_pickaxe": "燧石镐",
+  "item.harder_beginnings.flint_axe": "燧石斧",
+  "item.harder_beginnings.flint_shovel": "燧石铲",
+  "item.harder_beginnings.flint_knife": "燧石小刀",
+  "jade.harder_beginnings.charcoal_pit": "炭坑",
+  "jade.harder_beginnings.charcoal_pit.time": "剩余时间：%s / %s",
+  "jade.harder_beginnings.charcoal_pit.sealed": "当前密封度：%s",
+  "jade.harder_beginnings.charcoal_pit.qualified": "全密封合格率：%s",
+  "jade.harder_beginnings.charcoal_pit.result.charcoal": "当前判定：可产出木炭",
+  "jade.harder_beginnings.charcoal_pit.result.burned": "当前判定：会被烧毁"
+}

@@ -1,0 +1,21 @@
+{
+  "tab.harder_beginnings": "Harder Beginnings",
+  "block.harder_beginnings.wood_workbench": "Wood Workbench",
+  "block.harder_beginnings.clay_brick_block": "Clay Brick Block",
+  "item.harder_beginnings.wood_workbench": "Wood Workbench",
+  "item.harder_beginnings.clay_brick": "Clay Brick",
+  "item.harder_beginnings.fired_clay_brick": "Fired Clay Brick",
+  "item.harder_beginnings.clay_brick_block": "Clay Brick Block",
+  "item.harder_beginnings.fiber": "Fiber",
+  "item.harder_beginnings.hemp_string": "Hemp String",
+  "item.harder_beginnings.flint_pickaxe": "Flint Pickaxe",
+  "item.harder_beginnings.flint_axe": "Flint Axe",
+  "item.harder_beginnings.flint_shovel": "Flint Shovel",
+  "item.harder_beginnings.flint_knife": "Flint Knife",
+  "jade.harder_beginnings.charcoal_pit": "Charcoal Pit",
+  "jade.harder_beginnings.charcoal_pit.time": "Remaining: %s / %s",
+  "jade.harder_beginnings.charcoal_pit.sealed": "Current Seal: %s",
+  "jade.harder_beginnings.charcoal_pit.qualified": "Fully Sealed Uptime: %s",
+  "jade.harder_beginnings.charcoal_pit.result.charcoal": "Projected Result: Charcoal",
+  "jade.harder_beginnings.charcoal_pit.result.burned": "Projected Result: Burned Away"
+}

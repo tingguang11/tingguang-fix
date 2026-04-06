@@ -1,7 +1,7 @@
 package com.fix.myfix.inti;
 
-import com.fix.myfix.inti.blocks.entity.SimpleWorkbenchBlockEntity;
-import com.fix.myfix.myfix;
+import com.fix.myfix.MyFix;
+import com.fix.myfix.inti.blocks.entity.WoodWorkbenchBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -11,13 +11,13 @@ import net.minecraftforge.registries.RegistryObject;
 public class ModBlockEntities {
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, myfix.MODID);
+            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MyFix.MODID);
 
-    public static final RegistryObject<BlockEntityType<SimpleWorkbenchBlockEntity>> SIMPLE_WORKBENCH =
-            BLOCK_ENTITIES.register("simple_workbench",
+    public static final RegistryObject<BlockEntityType<WoodWorkbenchBlockEntity>> WOOD_WORKBENCH =
+            BLOCK_ENTITIES.register("wood_workbench",
                     () -> BlockEntityType.Builder.of(
-                            SimpleWorkbenchBlockEntity::new,
-                            ModBlocks.SIMPLE_WORKBENCH.get()
+                            WoodWorkbenchBlockEntity::new,
+                            ModBlocks.WOOD_WORKBENCH.get()
                     ).build(null));
 
     public static void register(IEventBus bus) {

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "harder_beginnings:fiber"
+    },
+    {
+      "item": "harder_beginnings:fiber"
+    },
+    {
+      "item": "harder_beginnings:fiber"
+    }
+  ],
+  "result": {
+    "item": "harder_beginnings:hemp_string",
+    "count": 1
+  }
+}

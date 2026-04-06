@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FZ",
+    "FS"
+  ],
+  "key": {
+    "F": {
+      "item": "minecraft:flint"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "Z": {
+      "item": "harder_beginnings:hemp_string"
+    }
+  },
+  "result": {
+    "item": "harder_beginnings:flint_axe",
+    "count": 1
+  }
+}

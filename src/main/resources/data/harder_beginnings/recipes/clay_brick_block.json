@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BB",
+    "BB"
+  ],
+  "key": {
+    "B": {
+      "item": "harder_beginnings:fired_clay_brick"
+    }
+  },
+  "result": {
+    "item": "harder_beginnings:clay_brick_block",
+    "count": 1
+  }
+}

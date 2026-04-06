@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SR",
+    "BX"
+  ],
+  "key": {
+    "B": {
+      "tag": "minecraft:logs"
+    },
+    "S": {
+      "item": "harder_beginnings:flint_knife"
+    },
+    "R": {
+      "item": "harder_beginnings:hemp_string"
+    },
+    "X": {
+      "item": "minecraft:flint"
+    }
+  },
+  "result": {
+    "item": "harder_beginnings:wood_workbench",
+    "count": 1
+  }
+}
