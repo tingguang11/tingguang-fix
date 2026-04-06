@@ -31,8 +31,6 @@ public class WoodWorkbenchBlockEntity extends BlockEntity {
         }
     }
 
-    // ===== 基础操作 =====
-
     public boolean addItem(int slot, ItemStack stack) {
         if (items.get(slot).isEmpty()) {
             ItemStack copy = stack.copy();
@@ -64,8 +62,6 @@ public class WoodWorkbenchBlockEntity extends BlockEntity {
         sync();
     }
 
-    // ===== NBT =====
-
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
@@ -78,8 +74,6 @@ public class WoodWorkbenchBlockEntity extends BlockEntity {
         items.clear();
         ContainerHelper.loadAllItems(tag, items);
     }
-
-    // ===== 同步 =====
 
     @Override
     public CompoundTag getUpdateTag() {

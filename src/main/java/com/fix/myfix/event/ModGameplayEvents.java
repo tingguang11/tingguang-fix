@@ -2,6 +2,7 @@ package com.fix.myfix.event;
 
 import com.fix.myfix.MyFix;
 import com.fix.myfix.config.HarderBeginningsConfig;
+import com.fix.myfix.inti.blocks.ClayKilnPortBlock;
 import com.fix.myfix.inti.ModItems;
 import com.fix.myfix.network.ModNetwork;
 import com.fix.myfix.system.CampfireFuelSavedData;
@@ -116,6 +117,10 @@ public final class ModGameplayEvents {
         }
 
         if (tryCampfireInteraction(event, serverLevel)) {
+            return;
+        }
+
+        if (serverLevel.getBlockState(event.getPos()).getBlock() instanceof ClayKilnPortBlock) {
             return;
         }
 

@@ -25,6 +25,18 @@ public class ModItems {
             ITEMS.register("clay_brick_block",
                     () -> new BlockItem(ModBlocks.CLAY_BRICK_BLOCK.get(),
                             new Item.Properties()));
+    public static final RegistryObject<Item> CLAY_KILN_INPUT_PORT_ITEM =
+            ITEMS.register("clay_kiln_input_port",
+                    () -> new BlockItem(ModBlocks.CLAY_KILN_INPUT_PORT.get(),
+                            new Item.Properties()));
+    public static final RegistryObject<Item> CLAY_KILN_FUEL_PORT_ITEM =
+            ITEMS.register("clay_kiln_fuel_port",
+                    () -> new BlockItem(ModBlocks.CLAY_KILN_FUEL_PORT.get(),
+                            new Item.Properties()));
+    public static final RegistryObject<Item> CLAY_KILN_IGNITION_PORT_ITEM =
+            ITEMS.register("clay_kiln_ignition_port",
+                    () -> new BlockItem(ModBlocks.CLAY_KILN_IGNITION_PORT.get(),
+                            new Item.Properties()));
 
     public static final RegistryObject<Item> FIBER = ITEMS.register("fiber",
             () -> new Item(new Item.Properties()));

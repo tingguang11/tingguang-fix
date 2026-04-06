@@ -5,6 +5,7 @@ import com.fix.myfix.inti.ModBlockEntities;
 import com.fix.myfix.inti.ModBlocks;
 import com.fix.myfix.inti.ModCreativeModeTabs;
 import com.fix.myfix.inti.ModItems;
+import com.fix.myfix.inti.ModRecipes;
 import com.fix.myfix.network.ModNetwork;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,6 +28,7 @@ public class MyFix {
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModCreativeModeTabs.register(modEventBus);
+        ModRecipes.register(modEventBus);
         ModNetwork.register();
 
         modEventBus.addListener(this::commonSetup);

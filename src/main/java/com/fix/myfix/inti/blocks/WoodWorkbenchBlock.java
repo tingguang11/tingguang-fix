@@ -93,8 +93,6 @@ public class WoodWorkbenchBlock extends Block implements EntityBlock {
                             );
                         }
                     }
-
-                    // ❗ 防止重复掉落
                     workbench.clear();
                 }
             }
@@ -117,14 +115,11 @@ public class WoodWorkbenchBlock extends Block implements EntityBlock {
         ItemStack held = player.getItemInHand(hand);
         int slot = getSlot(hit, state);
 
-        // 小刀触发合成
         if (held.is(ModItems.FLINT_KNIFE.get())) {
             held.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
             craft(workbench, player);
             return InteractionResult.CONSUME;
         }
-
-        // 取出
         if (held.isEmpty()) {
             ItemStack out = workbench.removeItem(slot);
             if (!out.isEmpty()) {
@@ -132,8 +127,6 @@ public class WoodWorkbenchBlock extends Block implements EntityBlock {
                 return InteractionResult.CONSUME;
             }
         }
-
-        // 放入
         if (!held.isEmpty()) {
             if (workbench.addItem(slot, held)) {
                 held.shrink(1);

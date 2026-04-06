@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BBB",
+    "BCB",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "harder_beginnings:fired_clay_brick"
+    },
+    "C": {
+      "item": "minecraft:clay_ball"
+    }
+  },
+  "result": {
+    "item": "harder_beginnings:clay_kiln_input_port",
+    "count": 1
+  }
+}

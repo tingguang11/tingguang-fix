@@ -24,6 +24,9 @@ public class ModCreativeModeTabs {
                                 output.accept(new ItemStack(ModItems.CLAY_BRICK.get()));
                                 output.accept(new ItemStack(ModItems.FIRED_CLAY_BRICK.get()));
                                 output.accept(new ItemStack(ModBlocks.CLAY_BRICK_BLOCK.get()));
+                                output.accept(new ItemStack(ModBlocks.CLAY_KILN_INPUT_PORT.get()));
+                                output.accept(new ItemStack(ModBlocks.CLAY_KILN_FUEL_PORT.get()));
+                                output.accept(new ItemStack(ModBlocks.CLAY_KILN_IGNITION_PORT.get()));
                                 output.accept(new ItemStack(ModItems.FIBER.get()));
                                 output.accept(new ItemStack(ModItems.HEMP_STRING.get()));
                                 output.accept(new ItemStack(ModItems.FLINT_PICKAXE.get()));
