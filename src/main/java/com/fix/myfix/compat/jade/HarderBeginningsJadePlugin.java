@@ -10,5 +10,6 @@ public class HarderBeginningsJadePlugin implements IWailaPlugin {
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(CharcoalPitJadeProvider.INSTANCE, Block.class);
+        registration.registerBlockComponent(ClayKilnJadeProvider.INSTANCE, Block.class);
     }
 }

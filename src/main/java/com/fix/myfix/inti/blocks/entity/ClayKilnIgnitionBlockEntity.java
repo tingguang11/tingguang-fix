@@ -18,6 +18,7 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
     private static final int INPUT_SLOT_COUNT = 4;
 
     private final NonNullList<ItemStack> inputItems = NonNullList.withSize(INPUT_SLOT_COUNT, ItemStack.EMPTY);
+    private ItemStack outputItem = ItemStack.EMPTY;
     private int storedFuelTicks;
     private int progressTicks;
     private boolean active;
@@ -46,6 +47,11 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
             return;
         }
 
+        ItemStack result = recipe.getResultItem(level.registryAccess());
+        if (!blockEntity.canAcceptOutput(result)) {
+            return;
+        }
+
         if (blockEntity.storedFuelTicks <= 0) {
             blockEntity.stopProcessing(false);
             return;
@@ -53,23 +59,14 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
 
         blockEntity.storedFuelTicks--;
         blockEntity.progressTicks++;
-        blockEntity.setChanged();
+        blockEntity.sync();
 
         if (blockEntity.progressTicks < recipe.getCookTime()) {
             return;
         }
 
         recipe.consumeInputs(blockEntity.inputItems);
-        ItemStack result = recipe.getResultItem(level.registryAccess()).copy();
-        if (!result.isEmpty()) {
-            level.addFreshEntity(new ItemEntity(
-                    level,
-                    pos.getX() + 0.5D,
-                    pos.getY() + 1.0D,
-                    pos.getZ() + 0.5D,
-                    result
-            ));
-        }
+        blockEntity.insertOutput(result.copy());
 
         blockEntity.progressTicks = 0;
 
@@ -78,7 +75,7 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
             blockEntity.active = false;
         }
 
-        blockEntity.setChanged();
+        blockEntity.sync();
     }
 
     public boolean addInput(ItemStack stack) {
@@ -88,13 +85,13 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
                 ItemStack copy = stack.copy();
                 copy.setCount(1);
                 inputItems.set(i, copy);
-                setChanged();
+                sync();
                 return true;
             }
 
             if (ItemStack.isSameItemSameTags(existing, stack) && existing.getCount() < existing.getMaxStackSize()) {
                 existing.grow(1);
-                setChanged();
+                sync();
                 return true;
             }
         }
@@ -113,7 +110,7 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
             if (existing.isEmpty()) {
                 inputItems.set(i, ItemStack.EMPTY);
             }
-            setChanged();
+            sync();
             return extracted;
         }
 
@@ -126,11 +123,19 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
 
     public void addFuel(int addedTicks) {
         storedFuelTicks += addedTicks;
-        setChanged();
+        sync();
     }
 
     public int getStoredFuelTicks() {
         return storedFuelTicks;
+    }
+
+    public int getProgressTicks() {
+        return progressTicks;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public boolean startProcessing(Level level) {
@@ -148,8 +153,27 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
         }
 
         active = true;
-        setChanged();
+        sync();
         return true;
+    }
+
+    public ItemStack getOutputItem() {
+        return outputItem;
+    }
+
+    public ItemStack removeOutput() {
+        if (outputItem.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack extracted = outputItem.copy();
+        outputItem = ItemStack.EMPTY;
+        sync();
+        return extracted;
+    }
+
+    public boolean hasValidStructure(Level level) {
+        return ClayKilnStructure.findByIgnition(level, worldPosition) != null;
     }
 
     public void dropContents(Level level) {
@@ -167,11 +191,22 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
             ));
         }
 
+        if (!outputItem.isEmpty()) {
+            level.addFreshEntity(new ItemEntity(
+                    level,
+                    worldPosition.getX() + 0.5D,
+                    worldPosition.getY() + 0.5D,
+                    worldPosition.getZ() + 0.5D,
+                    outputItem.copy()
+            ));
+        }
+
         clearInputs();
+        outputItem = ItemStack.EMPTY;
         storedFuelTicks = 0;
         progressTicks = 0;
         active = false;
-        setChanged();
+        sync();
     }
 
     private void stopProcessing(boolean resetProgress) {
@@ -179,13 +214,16 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
         if (resetProgress) {
             progressTicks = 0;
         }
-        setChanged();
+        sync();
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         ContainerHelper.saveAllItems(tag, inputItems);
+        if (!outputItem.isEmpty()) {
+            tag.put("OutputItem", outputItem.save(new CompoundTag()));
+        }
         tag.putInt("StoredFuelTicks", storedFuelTicks);
         tag.putInt("ProgressTicks", progressTicks);
         tag.putBoolean("Active", active);
@@ -196,6 +234,7 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
         super.load(tag);
         clearInputs();
         ContainerHelper.loadAllItems(tag, inputItems);
+        outputItem = tag.contains("OutputItem") ? ItemStack.of(tag.getCompound("OutputItem")) : ItemStack.EMPTY;
         storedFuelTicks = tag.getInt("StoredFuelTicks");
         progressTicks = tag.getInt("ProgressTicks");
         active = tag.getBoolean("Active");
@@ -209,6 +248,42 @@ public class ClayKilnIgnitionBlockEntity extends BlockEntity {
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    private boolean canAcceptOutput(ItemStack result) {
+        if (result.isEmpty()) {
+            return true;
+        }
+
+        if (outputItem.isEmpty()) {
+            return true;
+        }
+
+        if (!ItemStack.isSameItemSameTags(outputItem, result)) {
+            return false;
+        }
+
+        return outputItem.getCount() + result.getCount() <= outputItem.getMaxStackSize();
+    }
+
+    private void insertOutput(ItemStack result) {
+        if (result.isEmpty()) {
+            return;
+        }
+
+        if (outputItem.isEmpty()) {
+            outputItem = result;
+            return;
+        }
+
+        outputItem.grow(result.getCount());
+    }
+
+    private void sync() {
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
     private void clearInputs() {

@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "BBB",
-    "BBB",
+    "B B",
     "BBB"
   ],
   "key": {
@@ -11,7 +11,7 @@
     }
   },
   "result": {
-    "item": "harder_beginnings:clay_brick_block",
+    "item": "harder_beginnings:clay_kiln_output_port",
     "count": 1
   }
 }

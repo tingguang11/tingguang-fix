@@ -67,6 +67,7 @@ public class ClayKilnPortBlock extends BaseEntityBlock {
             case INPUT -> handleInput((ServerLevel) level, pos, player, hand);
             case FUEL -> handleFuel((ServerLevel) level, pos, player, hand);
             case IGNITION -> handleIgnition((ServerLevel) level, pos, player, hand);
+            case OUTPUT -> handleOutput((ServerLevel) level, pos, player);
         };
     }
 
@@ -106,13 +107,11 @@ public class ClayKilnPortBlock extends BaseEntityBlock {
     private InteractionResult handleInput(ServerLevel level, BlockPos pos, Player player, InteractionHand hand) {
         ClayKilnStructure structure = ClayKilnStructure.findByPort(level, pos);
         if (structure == null) {
-            fail(player, "message.harder_beginnings.clay_kiln.invalid_structure");
             return InteractionResult.CONSUME;
         }
 
         ClayKilnIgnitionBlockEntity master = structure.getMaster(level);
         if (master == null) {
-            fail(player, "message.harder_beginnings.clay_kiln.invalid_structure");
             return InteractionResult.CONSUME;
         }
 
@@ -142,13 +141,11 @@ public class ClayKilnPortBlock extends BaseEntityBlock {
     private InteractionResult handleFuel(ServerLevel level, BlockPos pos, Player player, InteractionHand hand) {
         ClayKilnStructure structure = ClayKilnStructure.findByPort(level, pos);
         if (structure == null) {
-            fail(player, "message.harder_beginnings.clay_kiln.invalid_structure");
             return InteractionResult.CONSUME;
         }
 
         ClayKilnIgnitionBlockEntity master = structure.getMaster(level);
         if (master == null) {
-            fail(player, "message.harder_beginnings.clay_kiln.invalid_structure");
             return InteractionResult.CONSUME;
         }
 
@@ -174,13 +171,11 @@ public class ClayKilnPortBlock extends BaseEntityBlock {
     private InteractionResult handleIgnition(ServerLevel level, BlockPos pos, Player player, InteractionHand hand) {
         ClayKilnStructure structure = ClayKilnStructure.findByIgnition(level, pos);
         if (structure == null) {
-            fail(player, "message.harder_beginnings.clay_kiln.invalid_structure");
             return InteractionResult.CONSUME;
         }
 
         ClayKilnIgnitionBlockEntity master = structure.getMaster(level);
         if (master == null) {
-            fail(player, "message.harder_beginnings.clay_kiln.invalid_structure");
             return InteractionResult.CONSUME;
         }
 
@@ -207,6 +202,29 @@ public class ClayKilnPortBlock extends BaseEntityBlock {
         }
 
         reportIgnitionFailure(player, master);
+        return InteractionResult.CONSUME;
+    }
+
+    private InteractionResult handleOutput(ServerLevel level, BlockPos pos, Player player) {
+        ClayKilnStructure structure = ClayKilnStructure.findByPort(level, pos);
+        if (structure == null) {
+            return InteractionResult.CONSUME;
+        }
+
+        ClayKilnIgnitionBlockEntity master = structure.getMaster(level);
+        if (master == null) {
+            return InteractionResult.CONSUME;
+        }
+
+        ItemStack extracted = master.removeOutput();
+        if (extracted.isEmpty()) {
+            fail(player, "message.harder_beginnings.clay_kiln.no_output");
+            return InteractionResult.CONSUME;
+        }
+
+        if (!player.addItem(extracted)) {
+            player.drop(extracted, false);
+        }
         return InteractionResult.CONSUME;
     }
 

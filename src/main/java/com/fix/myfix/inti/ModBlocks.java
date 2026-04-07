@@ -30,6 +30,9 @@ public class ModBlocks {
     public static final RegistryObject<Block> CLAY_KILN_IGNITION_PORT =
             BLOCKS.register("clay_kiln_ignition_port",
                     () -> new ClayKilnPortBlock(ClayKilnPortType.IGNITION, BlockBehaviour.Properties.copy(Blocks.BRICKS)));
+    public static final RegistryObject<Block> CLAY_KILN_OUTPUT_PORT =
+            BLOCKS.register("clay_kiln_output_port",
+                    () -> new ClayKilnPortBlock(ClayKilnPortType.OUTPUT, BlockBehaviour.Properties.copy(Blocks.BRICKS)));
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);

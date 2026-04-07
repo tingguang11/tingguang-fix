@@ -4,6 +4,7 @@
     "harder_beginnings:clay_brick_block",
     "harder_beginnings:clay_kiln_input_port",
     "harder_beginnings:clay_kiln_fuel_port",
-    "harder_beginnings:clay_kiln_ignition_port"
+    "harder_beginnings:clay_kiln_ignition_port",
+    "harder_beginnings:clay_kiln_output_port"
   ]
 }

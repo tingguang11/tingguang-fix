@@ -1,0 +1,16 @@
+{
+  "type": "harder_beginnings:clay_kiln",
+  "ingredients": [
+    {
+      "ingredient": {
+        "item": "harder_beginnings:copper_dust"
+      },
+      "count": 8
+    }
+  ],
+  "result": {
+    "item": "minecraft:copper_ingot",
+    "count": 1
+  },
+  "cookTime": 600
+}

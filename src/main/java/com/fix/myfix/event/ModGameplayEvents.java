@@ -7,9 +7,11 @@ import com.fix.myfix.inti.ModItems;
 import com.fix.myfix.network.ModNetwork;
 import com.fix.myfix.system.CampfireFuelSavedData;
 import com.fix.myfix.system.CharcoalPitSavedData;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -28,12 +30,16 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.event.TickEvent;
 
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = MyFix.MODID)
 public final class ModGameplayEvents {
@@ -43,6 +49,8 @@ public final class ModGameplayEvents {
             Blocks.TALL_GRASS,
             Blocks.LARGE_FERN
     );
+    private static final int COPPER_GRIND_TICKS = 40;
+    private static final Map<UUID, Integer> COPPER_GRIND_PROGRESS = new HashMap<>();
 
     private ModGameplayEvents() {
     }
@@ -167,6 +175,40 @@ public final class ModGameplayEvents {
     }
 
     @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide) {
+            return;
+        }
+
+        Player player = event.player;
+        UUID playerId = player.getUUID();
+        Integer progress = COPPER_GRIND_PROGRESS.get(playerId);
+        if (progress == null) {
+            return;
+        }
+
+        if (!canGrindCopper(player)) {
+            COPPER_GRIND_PROGRESS.remove(playerId);
+            return;
+        }
+
+        int nextProgress = progress + 1;
+        if (nextProgress < COPPER_GRIND_TICKS) {
+            COPPER_GRIND_PROGRESS.put(playerId, nextProgress);
+            if (nextProgress % 10 == 0) {
+                player.displayClientMessage(Component.translatable(
+                        "message.harder_beginnings.copper_grinding.progress",
+                        nextProgress * 100 / COPPER_GRIND_TICKS
+                ).withStyle(ChatFormatting.GRAY), true);
+            }
+            return;
+        }
+
+        COPPER_GRIND_PROGRESS.remove(playerId);
+        finishCopperGrinding(player);
+    }
+
+    @SubscribeEvent
     public static void onBlockPlaced(BlockEvent.EntityPlaceEvent event) {
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) {
             return;
@@ -189,6 +231,11 @@ public final class ModGameplayEvents {
     }
 
     @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        COPPER_GRIND_PROGRESS.remove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
     public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             ModNetwork.syncCharcoalPits(serverPlayer);
@@ -197,13 +244,71 @@ public final class ModGameplayEvents {
 
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        COPPER_GRIND_PROGRESS.remove(event.getEntity().getUUID());
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             ModNetwork.syncCharcoalPits(serverPlayer);
         }
     }
 
+    @SubscribeEvent
+    public static void onRightClickItem(RightClickItem event) {
+        Player player = event.getEntity();
+        if (!player.isShiftKeyDown() || player.level().isClientSide || event.getHand() != InteractionHand.MAIN_HAND) {
+            return;
+        }
+
+        if (!canGrindCopper(player)) {
+            return;
+        }
+
+        COPPER_GRIND_PROGRESS.put(player.getUUID(), 0);
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        event.setCanceled(true);
+    }
+
     private static boolean isIgnitionItem(ItemStack stack) {
         return stack.is(Items.FLINT_AND_STEEL) || stack.is(Items.FIRE_CHARGE);
+    }
+
+    private static boolean canGrindCopper(Player player) {
+        ItemStack mainHand = player.getMainHandItem();
+        ItemStack offHand = player.getOffhandItem();
+        return player.isShiftKeyDown()
+                && ((mainHand.is(Items.FLINT) && offHand.is(Items.RAW_COPPER))
+                || (mainHand.is(Items.RAW_COPPER) && offHand.is(Items.FLINT)));
+    }
+
+    private static void finishCopperGrinding(Player player) {
+        ItemStack rawCopperStack = player.getMainHandItem().is(Items.RAW_COPPER) ? player.getMainHandItem() : player.getOffhandItem();
+        ItemStack flintStack = player.getMainHandItem().is(Items.FLINT) ? player.getMainHandItem() : player.getOffhandItem();
+
+        if (rawCopperStack.isEmpty() || flintStack.isEmpty()) {
+            return;
+        }
+
+        if (!player.getAbilities().instabuild) {
+            rawCopperStack.shrink(1);
+            flintStack.shrink(1);
+        }
+
+        double roll = player.level().random.nextDouble();
+        int dustCount;
+        if (roll < 0.05D) {
+            dustCount = 3;
+        } else if (roll < 0.20D) {
+            dustCount = 1;
+        } else {
+            dustCount = 2;
+        }
+
+        ItemStack copperDust = new ItemStack(ModItems.COPPER_DUST.get(), dustCount);
+        if (!player.addItem(copperDust)) {
+            player.drop(copperDust, false);
+        }
+        player.displayClientMessage(Component.translatable(
+                "message.harder_beginnings.copper_grinding.done",
+                dustCount
+        ).withStyle(ChatFormatting.GOLD), true);
     }
 
     private static boolean tryCampfireInteraction(PlayerInteractEvent.RightClickBlock event, ServerLevel level) {

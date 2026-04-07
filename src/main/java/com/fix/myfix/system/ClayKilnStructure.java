@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public record ClayKilnStructure(BlockPos centerPos, BlockPos inputPortPos, BlockPos fuelPortPos,
-                                BlockPos ignitionPortPos) {
+                                BlockPos ignitionPortPos, BlockPos outputPortPos) {
     public static ClayKilnStructure findByPort(Level level, BlockPos portPos) {
         BlockPos min = portPos.offset(-2, -2, -2);
         BlockPos max = portPos.offset(2, 2, 2);
@@ -46,6 +46,7 @@ public record ClayKilnStructure(BlockPos centerPos, BlockPos inputPortPos, Block
 
         BlockPos inputPos = null;
         BlockPos fuelPos = null;
+        BlockPos outputPos = null;
 
         for (int y = -1; y <= 1; y++) {
             for (int x = -1; x <= 1; x++) {
@@ -72,7 +73,12 @@ public record ClayKilnStructure(BlockPos centerPos, BlockPos inputPortPos, Block
                                 return null;
                             }
                             fuelPos = currentPos.immutable();
-                        } else if (!currentState.is(ModBlocks.CLAY_BRICK_BLOCK.get())) {
+                        } else if (currentState.is(ModBlocks.CLAY_KILN_OUTPUT_PORT.get())) {
+                            if (!matchesPort(currentState, ModBlocks.CLAY_KILN_OUTPUT_PORT.get(), side) || outputPos != null) {
+                                return null;
+                            }
+                            outputPos = currentPos.immutable();
+                        } else {
                             return null;
                         }
                     } else if (!currentState.is(ModBlocks.CLAY_BRICK_BLOCK.get())) {
@@ -82,11 +88,11 @@ public record ClayKilnStructure(BlockPos centerPos, BlockPos inputPortPos, Block
             }
         }
 
-        if (inputPos == null || fuelPos == null) {
+        if (inputPos == null || fuelPos == null || outputPos == null) {
             return null;
         }
 
-        return new ClayKilnStructure(center, inputPos, fuelPos, ignitionPos.immutable());
+        return new ClayKilnStructure(center, inputPos, fuelPos, ignitionPos.immutable(), outputPos);
     }
 
     public ClayKilnIgnitionBlockEntity getMaster(Level level) {
@@ -98,7 +104,7 @@ public record ClayKilnStructure(BlockPos centerPos, BlockPos inputPortPos, Block
     }
 
     public boolean containsPort(BlockPos pos) {
-        return inputPortPos.equals(pos) || fuelPortPos.equals(pos) || ignitionPortPos.equals(pos);
+        return inputPortPos.equals(pos) || fuelPortPos.equals(pos) || ignitionPortPos.equals(pos) || outputPortPos.equals(pos);
     }
 
     public BlockPos getPortPos(ClayKilnPortType portType) {
@@ -106,6 +112,7 @@ public record ClayKilnStructure(BlockPos centerPos, BlockPos inputPortPos, Block
             case INPUT -> inputPortPos;
             case FUEL -> fuelPortPos;
             case IGNITION -> ignitionPortPos;
+            case OUTPUT -> outputPortPos;
         };
     }
 
