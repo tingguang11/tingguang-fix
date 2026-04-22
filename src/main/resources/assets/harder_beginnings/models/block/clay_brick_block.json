@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "harder_beginnings:block/clay_brick_block"
-  }
-}

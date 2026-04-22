@@ -2,8 +2,9 @@ package com.fix.myfix.event;
 
 import com.fix.myfix.MyFix;
 import com.fix.myfix.config.HarderBeginningsConfig;
-import com.fix.myfix.inti.blocks.ClayKilnPortBlock;
+import com.fix.myfix.inti.ModBlocks;
 import com.fix.myfix.inti.ModItems;
+import com.fix.myfix.inti.ModMobEffects;
 import com.fix.myfix.network.ModNetwork;
 import com.fix.myfix.system.CampfireFuelSavedData;
 import com.fix.myfix.system.CharcoalPitSavedData;
@@ -16,6 +17,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +27,7 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.sounds.SoundEvents;
@@ -37,20 +41,16 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.event.TickEvent;
 
 import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = MyFix.MODID)
 public final class ModGameplayEvents {
+    private static final int DEATH_PENALTY_DURATION_TICKS = 10 * 20;
     private static final Set<Block> FIBER_PLANTS = Set.of(
             Blocks.GRASS,
             Blocks.FERN,
             Blocks.TALL_GRASS,
             Blocks.LARGE_FERN
     );
-    private static final int COPPER_GRIND_TICKS = 40;
-    private static final Map<UUID, Integer> COPPER_GRIND_PROGRESS = new HashMap<>();
 
     private ModGameplayEvents() {
     }
@@ -61,6 +61,10 @@ public final class ModGameplayEvents {
 
     @SubscribeEvent
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
+        if (!HarderBeginningsConfig.flintToolsEnabled()) {
+            return;
+        }
+
         Player player = event.getEntity();
         if (player.getAbilities().instabuild) {
             return;
@@ -107,7 +111,8 @@ public final class ModGameplayEvents {
             return;
         }
 
-        if (heldItem.is(ModItems.FLINT_KNIFE.get())
+        if (HarderBeginningsConfig.flintToolsEnabled()
+                && heldItem.is(ModItems.FLINT_KNIFE.get())
                 && isFiberPlant(state)
                 && player.level().random.nextDouble() < HarderBeginningsConfig.fiberDropChance()) {
             Block.popResource(player.level(), event.getPos(), new ItemStack(ModItems.FIBER.get()));
@@ -125,10 +130,6 @@ public final class ModGameplayEvents {
         }
 
         if (tryCampfireInteraction(event, serverLevel)) {
-            return;
-        }
-
-        if (serverLevel.getBlockState(event.getPos()).getBlock() instanceof ClayKilnPortBlock) {
             return;
         }
 
@@ -175,46 +176,27 @@ public final class ModGameplayEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide) {
-            return;
-        }
-
-        Player player = event.player;
-        UUID playerId = player.getUUID();
-        Integer progress = COPPER_GRIND_PROGRESS.get(playerId);
-        if (progress == null) {
-            return;
-        }
-
-        if (!canGrindCopper(player)) {
-            COPPER_GRIND_PROGRESS.remove(playerId);
-            return;
-        }
-
-        int nextProgress = progress + 1;
-        if (nextProgress < COPPER_GRIND_TICKS) {
-            COPPER_GRIND_PROGRESS.put(playerId, nextProgress);
-            if (nextProgress % 10 == 0) {
-                player.displayClientMessage(Component.translatable(
-                        "message.harder_beginnings.copper_grinding.progress",
-                        nextProgress * 100 / COPPER_GRIND_TICKS
-                ).withStyle(ChatFormatting.GRAY), true);
-            }
-            return;
-        }
-
-        COPPER_GRIND_PROGRESS.remove(playerId);
-        finishCopperGrinding(player);
-    }
-
-    @SubscribeEvent
     public static void onBlockPlaced(BlockEvent.EntityPlaceEvent event) {
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) {
             return;
         }
 
         BlockState placedState = event.getPlacedBlock();
+        if (HarderBeginningsConfig.torchEnabled() && placedState.is(Blocks.TORCH)) {
+            serverLevel.setBlock(event.getPos(), ModBlocks.BURNING_TORCH.get().defaultBlockState(), 3);
+            return;
+        }
+
+        if (HarderBeginningsConfig.torchEnabled() && placedState.is(Blocks.WALL_TORCH)) {
+            serverLevel.setBlock(
+                    event.getPos(),
+                    ModBlocks.BURNING_WALL_TORCH.get().defaultBlockState()
+                            .setValue(WallTorchBlock.FACING, placedState.getValue(WallTorchBlock.FACING)),
+                    3
+            );
+            return;
+        }
+
         if (!(placedState.getBlock() instanceof CampfireBlock) || !placedState.getValue(BlockStateProperties.LIT)) {
             return;
         }
@@ -231,11 +213,6 @@ public final class ModGameplayEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        COPPER_GRIND_PROGRESS.remove(event.getEntity().getUUID());
-    }
-
-    @SubscribeEvent
     public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             ModNetwork.syncCharcoalPits(serverPlayer);
@@ -244,71 +221,27 @@ public final class ModGameplayEvents {
 
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        COPPER_GRIND_PROGRESS.remove(event.getEntity().getUUID());
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             ModNetwork.syncCharcoalPits(serverPlayer);
+            applyDeathPenalty(serverPlayer);
         }
-    }
-
-    @SubscribeEvent
-    public static void onRightClickItem(RightClickItem event) {
-        Player player = event.getEntity();
-        if (!player.isShiftKeyDown() || player.level().isClientSide || event.getHand() != InteractionHand.MAIN_HAND) {
-            return;
-        }
-
-        if (!canGrindCopper(player)) {
-            return;
-        }
-
-        COPPER_GRIND_PROGRESS.put(player.getUUID(), 0);
-        event.setCancellationResult(InteractionResult.SUCCESS);
-        event.setCanceled(true);
     }
 
     private static boolean isIgnitionItem(ItemStack stack) {
         return stack.is(Items.FLINT_AND_STEEL) || stack.is(Items.FIRE_CHARGE);
     }
 
-    private static boolean canGrindCopper(Player player) {
-        ItemStack mainHand = player.getMainHandItem();
-        ItemStack offHand = player.getOffhandItem();
-        return player.isShiftKeyDown()
-                && ((mainHand.is(Items.FLINT) && offHand.is(Items.RAW_COPPER))
-                || (mainHand.is(Items.RAW_COPPER) && offHand.is(Items.FLINT)));
-    }
-
-    private static void finishCopperGrinding(Player player) {
-        ItemStack rawCopperStack = player.getMainHandItem().is(Items.RAW_COPPER) ? player.getMainHandItem() : player.getOffhandItem();
-        ItemStack flintStack = player.getMainHandItem().is(Items.FLINT) ? player.getMainHandItem() : player.getOffhandItem();
-
-        if (rawCopperStack.isEmpty() || flintStack.isEmpty()) {
+    private static void applyDeathPenalty(net.minecraft.server.level.ServerPlayer player) {
+        if (!HarderBeginningsConfig.deathPenaltyEnabled()) {
             return;
         }
 
-        if (!player.getAbilities().instabuild) {
-            rawCopperStack.shrink(1);
-            flintStack.shrink(1);
-        }
-
-        double roll = player.level().random.nextDouble();
-        int dustCount;
-        if (roll < 0.05D) {
-            dustCount = 3;
-        } else if (roll < 0.20D) {
-            dustCount = 1;
-        } else {
-            dustCount = 2;
-        }
-
-        ItemStack copperDust = new ItemStack(ModItems.COPPER_DUST.get(), dustCount);
-        if (!player.addItem(copperDust)) {
-            player.drop(copperDust, false);
-        }
-        player.displayClientMessage(Component.translatable(
-                "message.harder_beginnings.copper_grinding.done",
-                dustCount
-        ).withStyle(ChatFormatting.GOLD), true);
+        player.addEffect(new MobEffectInstance(ModMobEffects.AFTEREFFECTS.get(), DEATH_PENALTY_DURATION_TICKS, 0, false, true, true));
+        player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, DEATH_PENALTY_DURATION_TICKS, 0, false, true, true));
+        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, DEATH_PENALTY_DURATION_TICKS, 0, false, true, true));
+        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, DEATH_PENALTY_DURATION_TICKS, 0, false, true, true));
+        player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, DEATH_PENALTY_DURATION_TICKS, 0, false, true, true));
+        player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, DEATH_PENALTY_DURATION_TICKS, 0, false, true, true));
     }
 
     private static boolean tryCampfireInteraction(PlayerInteractEvent.RightClickBlock event, ServerLevel level) {

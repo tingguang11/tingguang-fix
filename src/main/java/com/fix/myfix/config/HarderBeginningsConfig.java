@@ -25,17 +25,28 @@ public final class HarderBeginningsConfig {
 
     public static final ForgeConfigSpec SPEC;
 
+    private static final ForgeConfigSpec.BooleanValue FLINT_TOOLS_ENABLED;
     private static final ForgeConfigSpec.DoubleValue FIBER_DROP_CHANCE;
     private static final ForgeConfigSpec.IntValue CHARCOAL_BURN_SECONDS_PER_LOG;
     private static final ForgeConfigSpec.IntValue CHARCOAL_CHECK_INTERVAL_SECONDS;
     private static final ForgeConfigSpec.DoubleValue CHARCOAL_REQUIRED_SEAL_RATIO;
     private static final ForgeConfigSpec.DoubleValue CHARCOAL_REQUIRED_QUALIFIED_TIME_RATIO;
+    private static final ForgeConfigSpec.BooleanValue TORCH_ENABLED;
+    private static final ForgeConfigSpec.IntValue TORCH_BURN_SECONDS;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> CAMPFIRE_FUEL_ENTRIES;
+    private static final ForgeConfigSpec.BooleanValue WOOD_WORKBENCH_ENABLED;
+    private static final ForgeConfigSpec.BooleanValue DEATH_PENALTY_ENABLED;
 
     private static volatile CampfireFuelRules campfireFuelRules = CampfireFuelRules.empty();
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+
+        builder.push("flintTools");
+        FLINT_TOOLS_ENABLED = builder
+                .comment("If true, flint tool related mechanics stay enabled.")
+                .define("enabled", true);
+        builder.pop();
 
         builder.push("fiber");
         FIBER_DROP_CHANCE = builder
@@ -58,6 +69,15 @@ public final class HarderBeginningsConfig {
                 .defineInRange("requiredQualifiedTimeRatio", 0.8D, 0.0D, 1.0D);
         builder.pop();
 
+        builder.push("torch");
+        TORCH_ENABLED = builder
+                .comment("If true, custom torch burnout/extinguish mechanics stay enabled.")
+                .define("enabled", true);
+        TORCH_BURN_SECONDS = builder
+                .comment("How many seconds a torch can stay lit before it burns out.")
+                .defineInRange("burnSeconds", 600, 1, Integer.MAX_VALUE);
+        builder.pop();
+
         builder.push("campfire");
         CAMPFIRE_FUEL_ENTRIES = builder
                 .comment(
@@ -75,6 +95,18 @@ public final class HarderBeginningsConfig {
                 );
         builder.pop();
 
+        builder.push("woodWorkbench");
+        WOOD_WORKBENCH_ENABLED = builder
+                .comment("If true, the wood workbench feature stays enabled.")
+                .define("enabled", true);
+        builder.pop();
+
+        builder.push("deathPenalty");
+        DEATH_PENALTY_ENABLED = builder
+                .comment("If true, players receive a short aftereffects debuff after respawning.")
+                .define("enabled", true);
+        builder.pop();
+
         SPEC = builder.build();
         rebuildCampfireFuelRules();
     }
@@ -84,6 +116,10 @@ public final class HarderBeginningsConfig {
 
     public static double fiberDropChance() {
         return FIBER_DROP_CHANCE.get();
+    }
+
+    public static boolean flintToolsEnabled() {
+        return FLINT_TOOLS_ENABLED.get();
     }
 
     public static int charcoalBurnTicksPerLog() {
@@ -102,8 +138,24 @@ public final class HarderBeginningsConfig {
         return CHARCOAL_REQUIRED_QUALIFIED_TIME_RATIO.get();
     }
 
+    public static boolean torchEnabled() {
+        return TORCH_ENABLED.get();
+    }
+
+    public static int torchBurnTicks() {
+        return TORCH_BURN_SECONDS.get() * 20;
+    }
+
     public static int getCampfireFuelTicks(ItemStack stack) {
         return campfireFuelRules.getFuelTicks(stack);
+    }
+
+    public static boolean woodWorkbenchEnabled() {
+        return WOOD_WORKBENCH_ENABLED.get();
+    }
+
+    public static boolean deathPenaltyEnabled() {
+        return DEATH_PENALTY_ENABLED.get();
     }
 
     @SubscribeEvent

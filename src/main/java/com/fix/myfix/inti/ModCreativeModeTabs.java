@@ -1,6 +1,7 @@
 package com.fix.myfix.inti;
 
 import com.fix.myfix.MyFix;
+import com.fix.myfix.config.HarderBeginningsConfig;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -20,21 +21,17 @@ public class ModCreativeModeTabs {
                             .icon(() -> new ItemStack(Items.CRAFTING_TABLE))
                             .title(Component.translatable("tab.harder_beginnings"))
                             .displayItems((parameters, output) -> {
-                                output.accept(new ItemStack(ModBlocks.WOOD_WORKBENCH.get()));
-                                output.accept(new ItemStack(ModItems.CLAY_BRICK.get()));
-                                output.accept(new ItemStack(ModItems.FIRED_CLAY_BRICK.get()));
-                                output.accept(new ItemStack(ModBlocks.CLAY_BRICK_BLOCK.get()));
-                                output.accept(new ItemStack(ModBlocks.CLAY_KILN_INPUT_PORT.get()));
-                                output.accept(new ItemStack(ModBlocks.CLAY_KILN_FUEL_PORT.get()));
-                                output.accept(new ItemStack(ModBlocks.CLAY_KILN_IGNITION_PORT.get()));
-                                output.accept(new ItemStack(ModBlocks.CLAY_KILN_OUTPUT_PORT.get()));
-                                output.accept(new ItemStack(ModItems.COPPER_DUST.get()));
+                                if (HarderBeginningsConfig.woodWorkbenchEnabled()) {
+                                    output.accept(new ItemStack(ModBlocks.WOOD_WORKBENCH.get()));
+                                }
                                 output.accept(new ItemStack(ModItems.FIBER.get()));
                                 output.accept(new ItemStack(ModItems.HEMP_STRING.get()));
-                                output.accept(new ItemStack(ModItems.FLINT_PICKAXE.get()));
-                                output.accept(new ItemStack(ModItems.FLINT_AXE.get()));
-                                output.accept(new ItemStack(ModItems.FLINT_SHOVEL.get()));
-                                output.accept(new ItemStack(ModItems.FLINT_KNIFE.get()));
+                                if (HarderBeginningsConfig.flintToolsEnabled()) {
+                                    output.accept(new ItemStack(ModItems.FLINT_PICKAXE.get()));
+                                    output.accept(new ItemStack(ModItems.FLINT_AXE.get()));
+                                    output.accept(new ItemStack(ModItems.FLINT_SHOVEL.get()));
+                                    output.accept(new ItemStack(ModItems.FLINT_KNIFE.get()));
+                                }
                             })
                             .build());
 

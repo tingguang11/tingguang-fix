@@ -1,4 +1,10 @@
 {
+  "forge:conditions": [
+    {
+      "type": "harder_beginnings:feature_enabled",
+      "feature": "flint_tools"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "pattern": [
     " F",

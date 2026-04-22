@@ -1,7 +1,7 @@
 package com.fix.myfix.inti;
 
 import com.fix.myfix.MyFix;
-import com.fix.myfix.inti.blocks.entity.ClayKilnIgnitionBlockEntity;
+import com.fix.myfix.inti.blocks.entity.BurningTorchBlockEntity;
 import com.fix.myfix.inti.blocks.entity.WoodWorkbenchBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -20,11 +20,12 @@ public class ModBlockEntities {
                             WoodWorkbenchBlockEntity::new,
                             ModBlocks.WOOD_WORKBENCH.get()
                     ).build(null));
-    public static final RegistryObject<BlockEntityType<ClayKilnIgnitionBlockEntity>> CLAY_KILN_IGNITION_PORT =
-            BLOCK_ENTITIES.register("clay_kiln_ignition_port",
+    public static final RegistryObject<BlockEntityType<BurningTorchBlockEntity>> BURNING_TORCH =
+            BLOCK_ENTITIES.register("burning_torch",
                     () -> BlockEntityType.Builder.of(
-                            ClayKilnIgnitionBlockEntity::new,
-                            ModBlocks.CLAY_KILN_IGNITION_PORT.get()
+                            BurningTorchBlockEntity::new,
+                            ModBlocks.BURNING_TORCH.get(),
+                            ModBlocks.BURNING_WALL_TORCH.get()
                     ).build(null));
 
     public static void register(IEventBus bus) {

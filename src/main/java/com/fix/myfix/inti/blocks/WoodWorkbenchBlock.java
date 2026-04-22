@@ -1,5 +1,6 @@
 package com.fix.myfix.inti.blocks;
 
+import com.fix.myfix.config.HarderBeginningsConfig;
 import com.fix.myfix.inti.ModItems;
 import com.fix.myfix.inti.blocks.entity.WoodWorkbenchBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -104,6 +105,7 @@ public class WoodWorkbenchBlock extends Block implements EntityBlock {
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos,
                                  Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!HarderBeginningsConfig.woodWorkbenchEnabled()) return InteractionResult.PASS;
 
         if (level.isClientSide) return InteractionResult.CONSUME;
 

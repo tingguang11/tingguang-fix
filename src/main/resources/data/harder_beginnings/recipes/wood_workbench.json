@@ -1,4 +1,10 @@
 {
+  "forge:conditions": [
+    {
+      "type": "harder_beginnings:feature_enabled",
+      "feature": "wood_workbench"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "SR",

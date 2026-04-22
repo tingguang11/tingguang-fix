@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "harder_beginnings:block/burning_torch_unlit"
+    },
+    "lit=true": {
+      "model": "harder_beginnings:block/burning_torch_lit"
+    }
+  }
+}
